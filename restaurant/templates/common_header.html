@@ -1,0 +1,16 @@
+{% load static %}
+<!-- Header -->
+<header class="flex top-0 justify-between items-center p-3 bg-red-700 shadow-md fixed w-full z-50">
+    <div class="flex items-center space-x-3">
+        <img src="{% static 'images/logo.png' %}" alt="Логотип AROY AROY" class="w-10 h-10">
+        <div>
+            <h1 class="text-4xl font-extrabold text-white">AROY AROY</h1>
+            <p class="text-lg text-orange-200">Ресторан тайско-русской кухни</p>
+        </div>
+    </div>
+    <nav class="flex space-x-6">
+        <a href="{% url 'index' %}" class="text-white text-lg hover:text-orange-200 transition">Главная</a>
+        <a href="{% url 'menu' %}" class="text-white text-lg hover:text-orange-200 transition">Меню</a>
+        <a href="{% url 'cart' %}" class="text-white text-lg hover:text-orange-200 transition">Корзина</a>
+    </nav>
+</header>

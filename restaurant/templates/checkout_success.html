@@ -1,0 +1,23 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Success</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="alert alert-success text-center" role="alert">
+            <h1 class="display-4">Спасибо за ваш заказ!</h1>
+            <p class="lead">Ваш заказ успешно оформлен, и мы приступили к его обработке.</p>
+            <hr>
+            <p>Номер вашего заказа: <strong>{{ order_id }}</strong></p>
+            <p class="mb-0">Наши сотрудники скоро свяжутся с вами для уточнения деталей.</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Вернуться на главную</a>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

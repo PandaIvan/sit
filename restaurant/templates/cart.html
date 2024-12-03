@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Корзина - AROY AROY</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body class="bg-white font-sans">
+{% include 'common_header.html' %}
+
+<div class="container mx-auto p-0 pt-24">
+    <h2 class="text-3xl font-bold mb-5 text-center text-red-700">Ваша Корзина</h2>
+    {% if cart_items %}
+        <div class="grid grid-cols-1 gap-1"> 
+            {% for item in cart_items %}
+                <div class="grid grid-cols-[max-content_1fr_max-content] gap-20 card">
+                    <img class="w-[128px] h-[128px]" src="{% if item.product.image %}{{ item.product.image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}"
+                         alt="{{ item.product.name }}">
+                    <div class="card-content">
+                        <h3 class="text-xl font-semibold text-red-700">{{ item.product.name }}</h3>
+                        <p class="text-gray-700">{{ item.product.description }}</p>
+                        <p class="text-red-700 font-bold mt-2 product-price" data-price="{{ item.product.price }}">{{ item.product.price }} руб.</p>
+                    </div>
+                    <div class="card-actions">
+                        <div class="flex items-center justify-center mt-4">
+                            <button data-product-id="{{ item.product.id }}" type="button"
+                                    class="decrement bg-red-500 text-white px-3 py-1 rounded minus-button">-
+                            </button>
+                            <input data-product-id="{{ item.product.id }}" type="number" value="{{ item.quantity }}"
+                                   class="quantity-input w-16 text-center mx-2 border border-gray-300 rounded" min="1"
+                                   max="100" placeholder="1" step="1">
+                            <button data-product-id="{{ item.product.id }}" type="button"
+                                    class="increment bg-green-500 text-white px-3 py-1 rounded plus-button">+
+                            </button>
+                        </div>
+                        <div class="flex justify-center mt-4">
+                            <a href="{% url 'remove_from_cart' product_id=item.product.id %}"
+                               class="bg-red-500 text-white px-4 py-2 rounded">Удалить из корзины</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="mt-10 text-center">
+            <a href="{% url 'menu' %}" class="bg-red-700 text-white px-6 py-3 rounded-lg">Продолжить покупки</a>
+            <button id="open-checkout-modal" class="bg-green-700 text-white px-6 py-3 rounded-lg ml-4">Оформить заказ</button>
+        </div>
+
+        <!-- Общая сумма товаров -->
+        <div class="mt-10 text-center">
+            <h3 class="text-2xl font-bold text-red-700">Общая сумма: <span id="cart-total">{{ cart_total }}</span> руб.</h3>
+        </div>
+
+        <!-- Checkout Modal -->
+        <div id="checkout-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-lg p-10 max-w-lg w-full">
+                <h3 class="text-2xl font-bold text-red-700 mb-5">Оформление заказа</h3>
+                <ul class="mb-5" id="modal-cart-items">
+                    {% for item in cart_items %}
+                        <li class="text-gray-700 modal-cart-item" data-product-id="{{ item.product.id }}" data-price="{{ item.product.price }}">
+                            {{ item.product.name }} (<span class="modal-quantity">{{ item.quantity }}</span>) -
+                            {{ item.product.price|floatformat:2 }} * {{ item.quantity }} = <span class="modal-total-price">{{ item.total_price|floatformat:2 }}</span> руб.
+                        </li>
+                    {% endfor %}
+                </ul>
+                <p class="text-xl font-bold text-red-700 mb-5">Общая сумма: <span id="modal-total-price">{{ total_price|floatformat:2 }}</span> руб.</p>
+                <form method="post" action="{% url 'checkout' %}">
+                    {% csrf_token %}
+                    <div class="mb-4">
+                        <label for="phone" class="block text-gray-700 mb-2">Телефон для связи:</label>
+                        <input type="tel" id="phone" name="phone" class="w-full p-2 border border-gray-300 rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="email" class="block text-gray-700 mb-2">Email:</label>
+                        <input type="email" id="email" name="email" class="w-full p-2 border border-gray-300 rounded" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="delivery-option" class="block text-gray-700 mb-2">Выберите способ получения заказа:</label>
+                        <div class="flex flex-col space-y-2">
+                            <label class="inline-flex items-center">
+                                <input type="radio" id="delivery" name="delivery_option" value="delivery" class="form-radio text-red-600" required>
+                                <span class="ml-2">Доставка</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" id="pickup" name="delivery_option" value="pickup" class="form-radio text-red-600" required>
+                                <span class="ml-2">Забрать из бара</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input type="radio" id="eat_in" name="delivery_option" value="eat_in" class="form-radio text-red-600" required>
+                                <span class="ml-2">Покушать в баре</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div id="address-container" class="mb-4 hidden">
+                        <label for="address" class="block text-gray-700 mb-2">Адрес доставки:</label>
+                        <input type="text" id="address" name="address" class="w-full p-2 border border-gray-300 rounded" placeholder="Введите адрес доставки">
+                    </div>
+                    <div id="time-container" class="mb-4 hidden">
+                        <label for="time" class="block text-gray-700 mb-2">Выберите время:</label>
+                        <input type="time" id="time" name="time" class="w-full p-2 border border-gray-300 rounded">
+                    </div>
+                    <div class="mb-4">
+                        <label for="comments" class="block text-gray-700 mb-2">Комментарии к заказу:</label>
+                        <textarea id="comments" name="comments" class="w-full p-2 border border-gray-300 rounded" placeholder="Добавьте любые пожелания или уточнения к заказу"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-4">
+                        <button type="button" id="close-checkout-modal" class="bg-gray-500 text-white px-6 py-2 rounded">
+                            Отмена
+                        </button>
+                        <button type="submit" class="bg-green-700 text-white px-6 py-2 rounded">Подтвердить заказ</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    {% else %}
+        <p class="text-center text-gray-700">Ваша корзина пуста. Пожалуйста, добавьте блюда из меню.</p>
+        <div class="mt-10 text-center">
+            <a href="{% url 'menu' %}" class="bg-red-700 text-white px-6 py-3 rounded-lg">Перейти в меню</a>
+        </div>
+    {% endif %}
+</div>
+{% include 'common_footer.html' %}
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const plusButtons = document.querySelectorAll(".plus-button");
+        const minusButtons = document.querySelectorAll(".minus-button");
+        const quantityInputs = document.querySelectorAll(".quantity-input");
+        const cartTotalElement = document.getElementById("cart-total");
+        const modalCartItems = document.querySelectorAll(".modal-cart-item");
+        const modalTotalPriceElement = document.getElementById("modal-total-price");
+        const deliveryOption = document.getElementById('delivery');
+        const eatInOption = document.getElementById('eat_in');
+        const addressContainer = document.getElementById('address-container');
+        const timeContainer = document.getElementById('time-container');
+        const deliveryOptions = document.getElementsByName('delivery_option');
+
+        function updateCartTotal() {
+            let total = 0;
+            document.querySelectorAll('.card').forEach(card => {
+                const price = parseFloat(card.querySelector('.product-price').dataset.price);
+                const quantity = parseInt(card.querySelector('.quantity-input').value, 10);
+                total += price * quantity;
+
+                // Обновляем количество и общую сумму в модальном окне
+                const productId = card.querySelector('.quantity-input').dataset.productId;
+                const modalItem = document.querySelector(`.modal-cart-item[data-product-id="${productId}"]`);
+                if (modalItem) {
+                    modalItem.querySelector('.modal-quantity').textContent = quantity;
+                    modalItem.querySelector('.modal-total-price').textContent = (price * quantity).toFixed(2);
+                }
+            });
+            cartTotalElement.textContent = total.toFixed(2);
+            modalTotalPriceElement.textContent = total.toFixed(2);
+        }
+
+        plusButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = button.getAttribute('data-product-id');
+                const input = document.querySelector(`input[data-product-id="${productId}"]`);
+                let currentValue = parseInt(input.value, 10) || 0;
+                input.value = currentValue + 1;
+
+                // Обновление общей суммы
+                updateCartTotal();
+            });
+        });
+
+        minusButtons.forEach(button => {
+            button.addEventListener('click', function () {
+                const productId = button.getAttribute('data-product-id');
+                const input = document.querySelector(`input[data-product-id="${productId}"]`);
+                let currentValue = parseInt(input.value, 10) || 1;
+
+                if (currentValue > 1) {
+                    input.value = currentValue - 1;
+                }
+
+                // Обновление общей суммы
+                updateCartTotal();
+            });
+        });
+
+        quantityInputs.forEach(input => {
+            input.addEventListener('change', function () {
+                let currentValue = parseInt(input.value, 10);
+                if (currentValue < 1 || isNaN(currentValue)) {
+                    input.value = 1;
+                }
+
+                // Обновление общей суммы
+                updateCartTotal();
+            });
+        });
+
+        // Закрытие модального окна оформления заказа при нажатии на кнопку "Отмена"
+        const closeModalButton = document.getElementById('close-checkout-modal');
+        if (closeModalButton) {
+            closeModalButton.addEventListener('click', function () {
+                document.getElementById('checkout-modal').classList.add('hidden');
+            });
+        }
+
+        // Открытие модального окна оформления заказа при нажатии на кнопку "Оформить заказ"
+        const openModalButton = document.getElementById('open-checkout-modal');
+        if (openModalButton) {
+            openModalButton.addEventListener('click', function (event) {
+                event.preventDefault();
+                document.getElementById('checkout-modal').classList.remove('hidden');
+
+                // Обновление данных в модальном окне перед открытием
+                updateCartTotal();
+            });
+        }
+
+        // Показать/скрыть поле адреса доставки и поле времени в зависимости от выбранного способа получения заказа
+        deliveryOptions.forEach(option => {
+            option.addEventListener('change', function () {
+                if (deliveryOption.checked) {
+                    addressContainer.classList.remove('hidden');
+                    timeContainer.classList.add('hidden');
+                } else if (eatInOption.checked) {
+                    timeContainer.classList.remove('hidden');
+                    addressContainer.classList.add('hidden');
+                } else {
+                    addressContainer.classList.add('hidden');
+                    timeContainer.classList.add('hidden');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

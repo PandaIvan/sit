@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AROY AROY - Тайско-русская кухня</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('.slider').slick({
+                centerMode: true,
+                centerPadding: '60px',
+                slidesToShow: 3,
+                infinite: true,
+                autoplay: true,
+                autoplaySpeed: 2000,
+                arrows: true,
+                prevArrow: '<button type="button" class=" text-white bg-red-700 hover:bg-red-600 rounded-full p-3 transition-all duration-300 ease-in-out absolute left-0 transform -translate-y-1/2 top-1/2 z-10"></button>',
+                nextArrow: '<button type="button" class=" text-white bg-red-700 hover:bg-red-600 rounded-full p-3 transition-all duration-300 ease-in-out absolute right-0 transform -translate-y-1/2 top-1/2 z-10"></button>',
+                responsive: [
+                    {
+                        breakpoint: 1024,
+                        settings: {
+                            slidesToShow: 2,
+                            centerPadding: '40px',
+                            arrows: true,
+                        }
+                    },
+                    {
+                        breakpoint: 768,
+                        settings: {
+                            slidesToShow: 1,
+                            centerPadding: '40px',
+                            arrows: false,
+                        }
+                    }
+                ]
+            });
+        });
+    </script>
+
+
+</head>
+<body class="bg-white font-sans">
+{% include 'common_header.html' %}
+
+<!-- Main Content -->
+<main class="pt-24 p-10">
+    <!-- Welcome Section -->
+    <div class="container mx-auto flex flex-col items-center">
+        <div class="w-full max-w-3xl mb-10 overflow-hidden rounded-lg shadow-lg">
+            <img src="https://primebeef.ru/images/cms/thumbs/a5b0aeaa3fa7d6e58d75710c18673bd7ec6d5f6d/3-501_500_306_5_100.jpg"
+                 alt="Картинка с хавкой" class="w-full">
+        </div>
+        <div class="text-center max-w-2xl">
+            <h2 class="text-3xl font-bold mb-5 text-red-700">Добро пожаловать в AROY AROY!</h2>
+            <p class="text-xl text-gray-700 leading-relaxed">Испытайте уникальные вкусы тайско-русской кухни, где мы
+                совмещаем лучшие традиции обеих культур, чтобы создать восхитительные блюда.</p>
+        </div>
+    </div>
+
+    <!-- Promotions Slider -->
+    <div class="container mx-auto mt-20">
+        <h2 class="text-3xl font-bold mb-5 text-center text-red-700">Наши Акции</h2>
+        <div class="slider">
+            {% for promo in promotions %}
+                <div class="relative p-5">
+                    <!-- Блок с текстом поверх изображения -->
+                    <div class="absolute top-0 left-0 w-full h-full  text-white flex flex-col justify-center items-center p-4 z-10">
+                        <h3 class="text-3xl font-bold">{{ promo.title }}</h3>
+                        <p class="text-lg mt-2">{{ promo.description }}</p>
+                    </div>
+                    <!-- Изображение акции -->
+                    <img src="
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                            {% if promo.image %}{{ promo.image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}"
+                         alt="{{ promo.title }}"
+                         class="w-full h-96 object-cover rounded-lg shadow-md">
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+
+</main>
+
+{% include 'common_footer.html' %}
+</body>
+</html>

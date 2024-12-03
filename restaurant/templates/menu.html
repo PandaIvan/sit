@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Меню ресторана - AROY AROY</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body class="bg-white font-sans">
+<!-- Header -->
+{% include 'common_header.html' %}
+
+<div class="menu-categories container mx-auto p-10 pt-24">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+        {% for category in categories %}
+            {% if category.products.exists %}  <!-- Проверяем, есть ли продукты в категории -->
+                <a href="{% url 'category_detail' category.id %}"
+                   class="category bg-white shadow-md rounded-lg p-5 mb-6 text-center" style="aspect-ratio: 1/1;">
+                    <img src="
+                            {% if category.image %}{{ category.image.url }}{% else %}{% static 'images/default.jpg' %}{% endif %}"
+                         alt="{{ category.name }}" class="w-full h-full object-cover rounded-md mb-4">
+                    <h2 class="text-2xl font-bold mb-4 text-red-700">{{ category.name }}</h2>
+                </a>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+
+
+<!-- Footer -->
+{% include 'common_footer.html' %}
+
+</body>
+</html>
+
